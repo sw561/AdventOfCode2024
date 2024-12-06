@@ -7,99 +7,66 @@ typedef struct Point {
 	int i, j;
 } Point;
 
-int valid(Point * p, int N)
-{
-	return p->i >= 0 && p->i < N && p->j >= 0 && p->j < N;
-}
-
-int move(const char ** map, int N, Point * p, Point * d)
-{
-	p->i += d->i;
-	p->j += d->j;
-
-	if (!valid(p, N)) {
-		return 1;
-	}
-
-	if (map[p->i][p->j] == '#') {
-		// Take a step back and change direction
-		p->i -= d->i;
-		p->j -= d->j;
-
-		// Turn 90 degrees
-		// -1,0 -> 0, 1
-		// 0, 1 -> 1, 0
-		// 1, 0 -> 0, -1
-		// 0, -1 -> -1, 0
-
-		int temp = d->i;
-		d->i = d->j;
-		d->j = -temp;
-	}
-
-	return 0;
-}
-
-int map_dir(Point * d) {
-	// Map directions to numbers so we can store direction of previous visits
-	// as a bit in the visited int
-	if (d->i == -1 && d->j == 0) {
-		return 1;
-	} else if (d->i == 0 && d->j == 1) {
-		return 1 << 1;
-	} else if (d->i == 1 && d->j == 0) {
-		return 1 << 2;
-	} else if (d->i == 0 && d->j == -1) {
-		return 1 << 3;
-	} else {
-		assert(0 && "STOP");
-	}
-}
-
-struct rettype {
-	int count_visited, infinite_loop;
-};
-
-struct rettype detect_infinite_loop(const char ** map, int N, int ** visited, Point pos, Point dir){
+int detect_infinite_loop(const char ** map, int N,
+		int ** visited, Point pos, Point dir
+	){
 
 	int count_visited = 0;
-	int infinite_loop = 0;
 
 	for (int i=0; i < N; i++) {
 		memset(visited[i], 0, N * sizeof(int));
 	}
 
-	do {
+	while (1) {
 		if (!visited[pos.i][pos.j]) {
 			count_visited++;
 		}
-		int m = map_dir(&dir);
+
+		int m;
+		// Map directions to numbers so we can store direction of previous visits
+		// as a bit in the visited int
+		if (dir.i == -1) {
+			m = 1;
+		} else if (dir.i == 1) {
+			m = 1 << 1;
+		} else if (dir.j == -1) {
+			m = 1 << 2;
+		} else if (dir.j == +1) {
+			m = 1 << 3;
+		} else {
+			assert(0 && "STOP");
+		}
+
 		if (visited[pos.i][pos.j] & m) {
-			infinite_loop = 1;
-			break;
+			// Infinite loop detected
+			return -1;
 		}
 		visited[pos.i][pos.j] |= m;
-	} while (!move(map, N, &pos, &dir));
 
-	// if (infinite_loop) {
-	// 	for (int i=0; i < N; i++) {
-	// 		for (int j = 0; j < N; j++) {
-	// 			if (visited[i][j] != 0) {
-	// 				printf("X");
-	// 				// printf("%d", visited[i][j]);
-	// 			} else {
-	// 				printf("%c", map[i][j]);
-	// 			}
-	// 		}
-	// 		printf("\n");
-	// 	}
-	// 	printf("----------------------\n");
-	// }
+		pos.i += dir.i;
+		pos.j += dir.j;
 
-	return (struct rettype) {
-		.count_visited = count_visited,
-		.infinite_loop = infinite_loop
-		};
+		if (!(0 <= pos.i && pos.i < N && 0 <= pos.j && pos.j < N)) {
+			return count_visited;
+		}
+
+		if (map[pos.i][pos.j] == '#') {
+			// Take a step back and change direction
+			pos.i -= dir.i;
+			pos.j -= dir.j;
+
+			// Turn 90 degrees
+			// -1,0 -> 0, 1
+			// 0, 1 -> 1, 0
+			// 1, 0 -> 0, -1
+			// 0, -1 -> -1, 0
+
+			int temp = dir.i;
+			dir.i = dir.j;
+			dir.j = -temp;
+		}
+
+	}
 }
 
 int main()
@@ -137,11 +104,11 @@ int main()
 	assert(pos.i != 0);
 	assert(pos.j != 0);
 
-	struct rettype r = detect_infinite_loop(
+	int ret = detect_infinite_loop(
 		(const char **)map, N, visited, pos, dir
 		);
 
-	printf("Part 1: %d\n", r.count_visited);
+	printf("Part 1: %d\n", ret);
 	// printf("infinite loop: %d\n", r.infinite_loop);
 
 	int count_infinite_loop_obstacles = 0;
@@ -150,17 +117,26 @@ int main()
 			if (map[i][j] == '.' && visited[i][j]) {
 				map[i][j] = '#';
 
-				struct rettype r = detect_infinite_loop(
+				int ret = detect_infinite_loop(
 					(const char **)map, N, visited2, pos, dir
 					);
 
-				count_infinite_loop_obstacles += r.infinite_loop;
+				count_infinite_loop_obstacles += (ret < 0);
 				map[i][j] = '.';
 			}
 		}
 	}
 
 	printf("Part 2: %d\n", count_infinite_loop_obstacles);
+
+	for (int i=0; i < N; i++) {
+		free(map[i]);
+		free(visited[i]);
+		free(visited2[i]);
+	}
+	free(map);
+	free(visited);
+	free(visited2);
 
 	return 0;
 }
