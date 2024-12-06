@@ -7,18 +7,49 @@ typedef struct Point {
 	int i, j;
 } Point;
 
-int detect_infinite_loop(const char ** map, int N,
-		int ** visited, Point pos, Point dir
+typedef struct Array2D {
+	int * data;
+	int N, M;
+} Array2D;
+
+Array2D allocate_2D(int N, int M)
+{
+	return (Array2D) {
+		.data = malloc(N * M * sizeof(int*)),
+		.N = N,
+		.M = M
+		};
+}
+
+int valid(Array2D a, Point p)
+{
+	return (0 <= p.i && p.i < a.N && 0 <= p.j && p.j < a.M);
+}
+
+int * get(Array2D a, Point p)
+{
+	return &a.data[p.i * a.N + p.j];
+}
+
+void set_all(Array2D * a, int x)
+{
+	memset(a->data, x, a->N * a->M * sizeof(int));
+}
+
+void free_2D(Array2D a) {
+	free(a.data);
+}
+
+int detect_infinite_loop(const char ** map,
+		Array2D visited, Point pos, Point dir
 	){
 
 	int count_visited = 0;
 
-	for (int i=0; i < N; i++) {
-		memset(visited[i], 0, N * sizeof(int));
-	}
+	set_all(&visited, 0);
 
 	while (1) {
-		if (!visited[pos.i][pos.j]) {
+		if (!*get(visited, pos)) {
 			count_visited++;
 		}
 
@@ -37,16 +68,16 @@ int detect_infinite_loop(const char ** map, int N,
 			assert(0 && "STOP");
 		}
 
-		if (visited[pos.i][pos.j] & m) {
+		if (*get(visited, pos) & m) {
 			// Infinite loop detected
 			return -1;
 		}
-		visited[pos.i][pos.j] |= m;
+		*get(visited, pos) |= m;
 
 		pos.i += dir.i;
 		pos.j += dir.j;
 
-		if (!(0 <= pos.i && pos.i < N && 0 <= pos.j && pos.j < N)) {
+		if (!valid(visited, pos)) {
 			return count_visited;
 		}
 
@@ -75,12 +106,8 @@ int main()
 	scanf("%d\n", &N);
 
 	char ** map = calloc(N, sizeof (char*));
-	int ** visited = malloc(N * sizeof (int*));
-	int ** visited2 = malloc(N * sizeof (int*));
-	for (int i=0; i < N; i++) {
-		visited[i] = malloc(N * sizeof(int));
-		visited2[i] = malloc(N * sizeof(int));
-	}
+	Array2D visited = allocate_2D(N, N);
+	Array2D visited2 = allocate_2D(N, N);
 
 	Point pos = {0};
 	Point dir = {0};
@@ -89,8 +116,6 @@ int main()
 		size_t n;
 		getline(&map[i], &n, stdin);
 		n = strlen(map[i]);
-		// printf("%s", map[i]);
-		// printf("N=%d n = %ld\n", N, n);
 		assert((int)n == N+1);
 
 		for (int j = 0; j < N; j++) {
@@ -105,7 +130,7 @@ int main()
 	assert(pos.j != 0);
 
 	int ret = detect_infinite_loop(
-		(const char **)map, N, visited, pos, dir
+		(const char **)map, visited, pos, dir
 		);
 
 	printf("Part 1: %d\n", ret);
@@ -114,11 +139,11 @@ int main()
 	int count_infinite_loop_obstacles = 0;
 	for (int i=0; i < N; i++) {
 		for (int j=0; j < N; j++) {
-			if (map[i][j] == '.' && visited[i][j]) {
+			if (map[i][j] == '.' && *get(visited, (Point) {.i=i, .j=j} )) {
 				map[i][j] = '#';
 
 				int ret = detect_infinite_loop(
-					(const char **)map, N, visited2, pos, dir
+					(const char **)map, visited2, pos, dir
 					);
 
 				count_infinite_loop_obstacles += (ret < 0);
@@ -131,12 +156,10 @@ int main()
 
 	for (int i=0; i < N; i++) {
 		free(map[i]);
-		free(visited[i]);
-		free(visited2[i]);
 	}
 	free(map);
-	free(visited);
-	free(visited2);
+	free_2D(visited);
+	free_2D(visited2);
 
 	return 0;
 }

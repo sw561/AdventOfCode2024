@@ -45,4 +45,4 @@ test6: day6
 test: test1 test2 test3 test4 test5 test6
 
 clean:
-	rm day1 day2 day3 day4
+	rm day1 day2 day3 day4 day6
