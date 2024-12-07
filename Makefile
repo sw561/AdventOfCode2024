@@ -1,4 +1,4 @@
-all: day1 day2 day3 day4 day6
+all: day1 day2 day3 day4 day6 day7
 
 CFLAGS = -O3 -Wall -Wextra --std=gnu99
 
@@ -16,6 +16,9 @@ day4: day4.c
 
 day6: day6.c
 	gcc -o $@ $(CFLAGS) $<
+
+day7: day7.c
+	gcc -o $@ $(CFLAGS) $< -lm
 
 test1: day1
 	diff <(./day1 < day1.example.in) day1.example.out
@@ -42,7 +45,11 @@ test6: day6
 	diff <(./day6 < day6.example.in) day6.example.out
 	diff <(./day6 < day6.in) day6.out
 
-test: test1 test2 test3 test4 test5 test6
+test7: day7
+	diff <(./day7 < day7.example.in) day7.example.out
+	diff <(./day7 < day7.in) day7.out
+
+test: test1 test2 test3 test4 test5 test6 test7
 
 clean:
-	rm day1 day2 day3 day4 day6
+	rm day1 day2 day3 day4 day6 day7
