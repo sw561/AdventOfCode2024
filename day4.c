@@ -25,11 +25,9 @@ int find_xmas(char ** wordsearch, int i, int j, int dx, int dy, int N) {
 
 int find_x_mas(char ** wordsearch, int i, int j, int dx, int dy, int N) {
 	char * c = "MAS";
-	int x_steps[] = {0, 1, 2};
-	int y_steps[] = {0, 1, 2};
 	for (int d = 0; d < 3; d++) {
-		int ci = i + dx * x_steps[d];
-		int cj = j + dy * y_steps[d];
+		int ci = i + dx * d;
+		int cj = j + dy * d;
 
 		if (!valid(ci, cj, N)) return 0;
 

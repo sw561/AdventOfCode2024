@@ -6,26 +6,19 @@
 // Generate ternary permutations by looping from 0 -> 3**n-1
 // And get ith term by getting ith value
 
-typedef long long int ll;
-
-int ith_bool(int perm, int i) {
-	return (perm & (1 << i)) > 0;
-}
-
-int ith_tern(int perm, int i) {
-	return (perm / (int)pow(3, i)) % 3;
-}
+typedef long long ll;
 
 int ndigits(ll x) {
-	return (int)(log10((double)x) + 1);
+	return (int)(log10((float)x) + 1);
 }
 
 int evaluate_all_part1(ll * operands, size_t N, ll test_value)
 {
-	for (int perm=0; perm < (1 << (N-1)); perm++) {
+	int total_permutations = (1 << (N-1));
+	for (int perm=0; perm < total_permutations; perm++) {
 		ll ret = operands[0];
-		for (int i=1; i < (int)N; i++) {
-			switch(ith_bool(perm, i-1)) {
+		for (int i=1, p=perm; i < (int)N; i++, p/=2) {
+			switch(p % 2) {
 				case 0:
 					ret += operands[i];
 					break;
@@ -45,10 +38,16 @@ int evaluate_all_part1(ll * operands, size_t N, ll test_value)
 
 int evaluate_all_part2(ll * operands, size_t N, ll test_value)
 {
-	for (int perm=0; perm < pow(3, N-1); perm++) {
+	int p10ndigits_[N] = {};
+	for (int i=1; i < (int)N; i++) {
+		p10ndigits_[i] = pow(10, ndigits(operands[i]));
+	}
+
+	int total_permutations = pow(3, N-1);
+	for (int perm=0; perm < total_permutations; perm++) {
 		ll ret = operands[0];
-		for (int i=1; i < (int)N; i++) {
-			switch(ith_tern(perm, i-1)) {
+		for (int i=1, p=perm; i < (int)N; i++, p/=3) {
+			switch(p%3) {
 				case 0:
 					ret += operands[i];
 					break;
@@ -56,10 +55,13 @@ int evaluate_all_part2(ll * operands, size_t N, ll test_value)
 					ret *= operands[i];
 					break;
 				case 2:
-					ret = (ret * pow(10, ndigits(operands[i]))) + operands[i];
+					ret = (ret * p10ndigits_[i]) + operands[i];
 					break;
 				default:
 					assert(0), "Unreachable";
+			}
+			if (ret > test_value) {
+				break;
 			}
 		}
 		if (ret == test_value) {
