@@ -20,59 +20,49 @@ int ndigits(ll x) {
 	return (int)(log10((double)x) + 1);
 }
 
-ll evaluate(ll * operands, size_t N, int perm)
-{
-	ll ret = operands[0];
-	for (int i=1; i < (int)N; i++) {
-		switch(ith_bool(perm, i-1)) {
-			case 0:
-				ret += operands[i];
-				break;
-			case 1:
-				ret *= operands[i];
-				break;
-			default:
-				assert(0), "Unreachable";
-		}
-	}
-	return ret;
-}
-
-int evaluate_all(ll * operands, size_t N, ll test_value)
+int evaluate_all_part1(ll * operands, size_t N, ll test_value)
 {
 	for (int perm=0; perm < (1 << (N-1)); perm++) {
-		if (evaluate(operands, N, perm) == test_value) {
+		ll ret = operands[0];
+		for (int i=1; i < (int)N; i++) {
+			switch(ith_bool(perm, i-1)) {
+				case 0:
+					ret += operands[i];
+					break;
+				case 1:
+					ret *= operands[i];
+					break;
+				default:
+					assert(0), "Unreachable";
+			}
+		}
+		if (ret == test_value) {
 			return 1;
 		}
 	}
 	return 0;
 }
 
-ll evaluate_part2(ll * operands, size_t N, int perm)
-{
-	ll ret = operands[0];
-	for (int i=1; i < (int)N; i++) {
-		switch(ith_tern(perm, i-1)) {
-			case 0:
-				ret += operands[i];
-				break;
-			case 1:
-				ret *= operands[i];
-				break;
-			case 2:
-				ret = (ret * pow(10, ndigits(operands[i]))) + operands[i];
-				break;
-			default:
-				assert(0), "Unreachable";
-		}
-	}
-	return ret;
-}
-
 int evaluate_all_part2(ll * operands, size_t N, ll test_value)
 {
 	for (int perm=0; perm < pow(3, N-1); perm++) {
-		if (evaluate_part2(operands, N, perm) == test_value) {
+		ll ret = operands[0];
+		for (int i=1; i < (int)N; i++) {
+			switch(ith_tern(perm, i-1)) {
+				case 0:
+					ret += operands[i];
+					break;
+				case 1:
+					ret *= operands[i];
+					break;
+				case 2:
+					ret = (ret * pow(10, ndigits(operands[i]))) + operands[i];
+					break;
+				default:
+					assert(0), "Unreachable";
+			}
+		}
+		if (ret == test_value) {
 			return 1;
 		}
 	}
@@ -107,20 +97,10 @@ int main()
 			buf_ptr += 1;
 		} while (x == ' ');
 
-		// printf("%lld: ", value);
-		// for (size_t i=0; i < ri; i++) {
-		// 	printf("%lld ", operands[i]);
-		// }
-		int e1 = evaluate_all(operands, ri, value);
-		int e = evaluate_all_part2(operands, ri, value);
-		// printf("EVAL: %d", e);
-		// printf("\n");
-
-		if (e1) {
+		if(evaluate_all_part1(operands, ri, value)) {
 			part1 += value;
 		}
-
-		if (e) {
+		if(evaluate_all_part2(operands, ri, value)) {
 			part2 += value;
 		}
 	}
