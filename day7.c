@@ -9,15 +9,15 @@
 typedef long long ll;
 
 int ndigits(ll x) {
-	return (int)(log10((float)x) + 1);
+	return (int)(log10((float)x)) + 1;
 }
 
-int evaluate_all_part1(ll * operands, size_t N, ll test_value)
+int evaluate_all_part1(ll * operands, int N, ll test_value)
 {
 	int total_permutations = (1 << (N-1));
 	for (int perm=0; perm < total_permutations; perm++) {
 		ll ret = operands[0];
-		for (int i=1, p=perm; i < (int)N; i++, p/=2) {
+		for (int i=1, p=perm; i < N; i++, p/=2) {
 			switch(p % 2) {
 				case 0:
 					ret += operands[i];
@@ -36,17 +36,17 @@ int evaluate_all_part1(ll * operands, size_t N, ll test_value)
 	return 0;
 }
 
-int evaluate_all_part2(ll * operands, size_t N, ll test_value)
+int evaluate_all_part2(ll * operands, int N, ll test_value)
 {
 	int p10ndigits_[N] = {};
-	for (int i=1; i < (int)N; i++) {
+	for (int i=1; i < N; i++) {
 		p10ndigits_[i] = pow(10, ndigits(operands[i]));
 	}
 
 	int total_permutations = pow(3, N-1);
 	for (int perm=0; perm < total_permutations; perm++) {
 		ll ret = operands[0];
-		for (int i=1, p=perm; i < (int)N; i++, p/=3) {
+		for (int i=1, p=perm; i < N; i++, p/=3) {
 			switch(p%3) {
 				case 0:
 					ret += operands[i];
@@ -88,7 +88,7 @@ int main()
 		sscanf(buf_ptr, "%lld: %n", &value, &n);
 		buf_ptr += n;
 
-		size_t ri = 0;
+		int ri = 0;
 		char x = '0';
 		do {
 			sscanf(buf_ptr, "%lld%n", operands+ri, &n);
