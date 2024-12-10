@@ -1,12 +1,10 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
-#include <deque>
 
 using namespace std;
 
-template<typename T>
-void onelinevector(T v)
+void onelinevector(vector<int> v)
 {
 	for (int i=0; i < (int)v.size(); i++) {
 		if (v[i] >= 0) {
@@ -25,23 +23,24 @@ int main()
 	string s;
 	getline(cin, s);
 
-	deque<int> spaces;
-	deque<int> occupied;
+	vector<int> spaces;
+	vector<int> occupied;
 
 	int ID=0;
 
+	int pos=0;
 	for (int i=0; i<(int)s.size(); i++) {
 		int x = (int)(s[i]) - (int)'0';
 
 		if (i%2==0) {
 			for (int j=0; j < x; j++) {
-				occupied.push_back(mem.size());
+				occupied.push_back(pos++);
 				mem.push_back(ID);
 			}
 			ID++;
 		} else {
 			for (int j=0; j < x; j++) {
-				spaces.push_back(mem.size());
+				spaces.push_back(pos++);
 				mem.push_back(-1);
 			}
 		}
@@ -52,14 +51,16 @@ int main()
 	// onelinevector(occupied);
 	// printf("------------\n");
 
-	while (!occupied.empty() && !spaces.empty()) {
-		int src  = occupied.back();
-		int dest = spaces.front();
+	auto oit=occupied.rbegin();
+	auto sit=spaces.begin();
+	for ( ;oit != occupied.rend() && sit != spaces.end(); oit++, sit++) {
+		int src  = *oit;
+		int dest = *sit;
 
 		if (src <= dest) break;
 
-		occupied.pop_back();
-		spaces.pop_front();
+		// occupied.pop_back();
+		// spaces.pop_front();
 
 		mem[dest] = mem[src];
 		mem[src] = -1;
@@ -74,9 +75,7 @@ int main()
 		if (mem[i] < 0) break;
 		checksum += i * mem[i];
 	}
-
 	printf("Part 1: %lld\n", checksum);
 
 	return 0;
 }
-

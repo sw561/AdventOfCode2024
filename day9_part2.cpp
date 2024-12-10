@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
-#include <deque>
 
 using namespace std;
 
@@ -9,7 +8,7 @@ typedef struct Block {
 	int pos, size, ID;
 } Block;
 
-void print(deque<Block> d)
+void print(vector<Block> d)
 {
 	for (auto b : d) {
 		printf("(%d,%d,%d) ", b.pos, b.size, b.ID);
@@ -17,7 +16,7 @@ void print(deque<Block> d)
 	printf("\n");
 }
 
-void print_mem(deque<Block> occupied, deque<Block> spaces)
+void print_mem(vector<Block> occupied, vector<Block> spaces)
 {
 	std::vector<char> c_arr(1024, '\'');
 	int max_pos = 0;
@@ -41,24 +40,13 @@ void print_mem(deque<Block> occupied, deque<Block> spaces)
 	printf("\n");
 }
 
-long long checksum(deque<Block> occupied)
-{
-	long long ret = 0;
-	for (auto b : occupied) {
-		for (int pos = b.pos; pos < b.pos + b.size; pos++) {
-			ret += pos * b.ID;
-		}
-	}
-	return ret;
-}
-
 int main()
 {
 	string s;
 	getline(cin, s);
 
-	deque<Block> spaces;
-	deque<Block> occupied;
+	vector<Block> spaces;
+	vector<Block> occupied;
 
 	int ID=0;
 
@@ -72,12 +60,10 @@ int main()
 				.size=x,
 				.ID=ID++});
 		} else {
-			if (x > 0) {
-				spaces.push_back(Block{
-					.pos=pos,
-					.size=x,
-					.ID=-1});
-			}
+			spaces.push_back(Block{
+				.pos=pos,
+				.size=x,
+				.ID=-1});
 		}
 		pos += x;
 	}
@@ -86,30 +72,18 @@ int main()
 	// print(spaces);
 	// print_mem(occupied,spaces);
 
-	// deque<Block> new_occupied;
-
 	for (auto oit = occupied.rbegin(); oit != occupied.rend(); oit++) {
-		auto sit = spaces.begin();
-		bool found_move = false;
-		for (; sit != spaces.end(); sit++) {
+		for (auto sit = spaces.begin(); sit != spaces.end(); sit++) {
 			if (sit->pos > oit->pos) break;
 			if (sit->size >= oit->size) {
-				found_move = true;
+
+				oit->pos = sit->pos;
+
+				sit->pos  += oit->size;
+				sit->size -= oit->size;
 				break;
 			}
 		}
-
-		if (!found_move) continue;
-
-		oit->pos = sit->pos;
-
-		if (sit->size > oit->size) {
-			sit->pos  += oit->size;
-			sit->size -= oit->size;
-		} else {
-			spaces.erase(sit);
-		}
-
 		// print_mem(occupied,spaces);
 	}
 
@@ -117,9 +91,13 @@ int main()
 	// print(spaces);
 	// print_mem(occupied,spaces);
 
-	printf("Part 2: %lld\n", checksum(occupied));
+	long long checksum = 0;
+	for (auto b : occupied) {
+		for (int pos = b.pos; pos < b.pos + b.size; pos++) {
+			checksum += pos * b.ID;
+		}
+	}
+	printf("Part 2: %lld\n", checksum);
 
 	return 0;
 }
-
-
