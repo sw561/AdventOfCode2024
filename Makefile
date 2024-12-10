@@ -1,4 +1,4 @@
-all: day1 day2 day3 day4 day6 day7 day8 day9 day9_part2
+all: day1 day2 day3 day4 day6 day7 day8 day9 day9_part2 day10
 
 CFLAGS = -O3 -Wall -Wextra --std=gnu99
 CPPFLAGS = -O3 -Wall -Wextra --std=c++17
@@ -28,6 +28,9 @@ day9: day9.cpp
 	g++ -o $@ $(CPPFLAGS) $<
 
 day9_part2: day9_part2.cpp
+	g++ -o $@ $(CPPFLAGS) $<
+
+day10: day10.cpp
 	g++ -o $@ $(CPPFLAGS) $<
 
 test1: day1
@@ -69,7 +72,11 @@ test9: day9 day9_part2
 	diff <(./day9_part2 < day9.example.in) day9_part2.example.out
 	diff <(./day9_part2 < day9.in) day9_part2.out
 
-test: test1 test2 test3 test4 test5 test6 test7 test8 test9
+test10: day10
+	diff <(./day10 < day10.example.in) day10.example.out
+	diff <(./day10 < day10.in) day10.out
+
+test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10
 
 clean:
-	rm day1 day2 day3 day4 day6 day7 day8 day9
+	rm day1 day2 day3 day4 day6 day7 day8 day9 day10
