@@ -1,4 +1,4 @@
-all: day1 day2 day3 day4 day6 day7 day8
+all: day1 day2 day3 day4 day6 day7 day8 day9
 
 CFLAGS = -O3 -Wall -Wextra --std=gnu99
 CPPFLAGS = -O3 -Wall -Wextra --std=c++17
@@ -22,6 +22,9 @@ day7: day7.c
 	gcc -o $@ $(CFLAGS) $< -lm
 
 day8: day8.cpp
+	g++ -o $@ $(CPPFLAGS) $<
+
+day9: day9.cpp
 	g++ -o $@ $(CPPFLAGS) $<
 
 test1: day1
@@ -60,4 +63,4 @@ test8: day8
 test: test1 test2 test3 test4 test5 test6 test7 test8
 
 clean:
-	rm day1 day2 day3 day4 day6 day7 day8
+	rm day1 day2 day3 day4 day6 day7 day8 day9
