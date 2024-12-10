@@ -33,21 +33,18 @@ int main()
 	for (int i=0; i<(int)s.size(); i++) {
 		int x = (int)(s[i]) - (int)'0';
 
-		for (int j=0; j < x; j++) {
-			occupied.push_back(mem.size());
-			mem.push_back(ID);
+		if (i%2==0) {
+			for (int j=0; j < x; j++) {
+				occupied.push_back(mem.size());
+				mem.push_back(ID);
+			}
+			ID++;
+		} else {
+			for (int j=0; j < x; j++) {
+				spaces.push_back(mem.size());
+				mem.push_back(-1);
+			}
 		}
-
-		i++;
-
-		x = (int)(s[i]) - (int)'0';
-
-		for (int j=0; j < x; j++) {
-			spaces.push_back(mem.size());
-			mem.push_back(-1);
-		}
-
-		ID++;
 	}
 
 	// onelinevector(mem);
@@ -64,9 +61,8 @@ int main()
 		occupied.pop_back();
 		spaces.pop_front();
 
-		int val = mem[src];
+		mem[dest] = mem[src];
 		mem[src] = -1;
-		mem[dest] = val;
 	}
 
 	// onelinevector(mem);
