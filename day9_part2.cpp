@@ -4,9 +4,9 @@
 
 using namespace std;
 
-typedef struct Block {
+struct Block {
 	int pos, size, ID;
-} Block;
+};
 
 void print(vector<Block> d)
 {
