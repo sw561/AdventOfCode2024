@@ -1,59 +1,37 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
-
-def debug(*args, **kwargs):
-    return 0 # print(*args, **kwargs)
-
-def read_input():
-    import fileinput
-
-    m = []
-
-    for line in fileinput.input():
-        m.append(line.strip())
-
-    return m
+import fileinput
 
 def neighbours(m, p, q):
     for x, y in [(p-1, q), (p+1, q), (p, q-1), (p, q+1)]:
         if 0 <= x < len(m) and 0 <= y < len(m[x]):
             yield x, y
 
-def price(region):
-    def add_or_remove(s, p):
-        if p in s:
-            s.remove(p)
-        else:
-            s.add(p)
-    vertical_faces = set()
-    horizontal_faces = set()
-
-    for i, j in region:
-        add_or_remove(vertical_faces, (i, j))
-        add_or_remove(vertical_faces, (i+1, j))
-        add_or_remove(horizontal_faces, (i, j))
-        add_or_remove(horizontal_faces, (i, j+1))
-
-    n_faces = len(vertical_faces) + len(horizontal_faces)
-
-    area = len(region)
-
-    return area * n_faces
-
 LEFT = 0
 RIGHT = 1
 UP = 0
 DOWN = 1
 
-def price_part2(region):
+def add_or_remove(s, a):
+    (i, j, side) = a
+    if (i, j, 1-side) in s:
+        s.remove((i, j, 1-side))
+    else:
+        s.add(a)
 
-    def add_or_remove(s, a):
-        (i, j, side) = a
-        if (i, j, 1-side) in s:
-            s.remove((i, j, 1-side))
-        else:
-            s.add(a)
+def search_and_remove(faces, start, func):
+    # Use func to find faces which are part of the same group and remove
+
+    face = func(*start)
+    while face in faces:
+        faces.remove(face)
+        face = func(*face)
+
+
+def price(region):
+
+    area = len(region)
 
     vertical_faces = set()
     horizontal_faces = set()
@@ -64,66 +42,36 @@ def price_part2(region):
         add_or_remove(horizontal_faces, (i, j, UP))
         add_or_remove(horizontal_faces, (i+1, j, DOWN))
 
-    debug(region)
-
-    debug("horizontal_faces:", horizontal_faces)
+    part1 = area * (len(horizontal_faces) + len(vertical_faces))
 
     # Count sides
 
     h_sides = 0
     while horizontal_faces:
-        (i, j, side) = horizontal_faces.pop()
+        face = horizontal_faces.pop()
         h_sides += 1
-        side_list = [(i, j, side)]
 
-        ci, cj = i, j
+        for d in [-1,1]:
+            search_and_remove(horizontal_faces, face,
+                    (lambda i, j, side: (i, j+d, side))
+                    )
 
-        # Search right and left
-        while (i, j+1, side) in horizontal_faces:
-            j += 1
-            horizontal_faces.remove((i, j, side))
-            side_list.append((i, j, side))
-
-        i, j = ci, cj
-        while (i, j-1, side) in horizontal_faces:
-            j -= 1
-            horizontal_faces.remove((i, j, side))
-            side_list.append((i, j, side))
-
-        debug("Horizontal", side_list)
-
-    debug("vertical_faces:", vertical_faces)
     v_sides = 0
     while vertical_faces:
-        (i, j, side) = vertical_faces.pop()
+        face = vertical_faces.pop()
         v_sides += 1
-        side_list = [(i, j, side)]
 
-        ci, cj = i, j
-        # Search up and down
-        while (i+1, j, side) in vertical_faces:
-            i += 1
-            vertical_faces.remove((i, j, side))
-            side_list.append((i, j, side))
+        for d in [-1,1]:
+            search_and_remove(vertical_faces, face,
+                    (lambda i, j, side: (i+d, j, side))
+                    )
 
-        i, j = ci, cj
-        while (i-1, j, side) in vertical_faces:
-            i -= 1
-            vertical_faces.remove((i, j, side))
-            side_list.append((i, j, side))
+    part2 = area * (h_sides + v_sides)
 
-        debug("Vertical", side_list)
-
-    area = len(region)
-
-    n_sides = h_sides + v_sides
-
-    debug("area, n_sides, area * n_sides:", area, n_sides, area * n_sides)
-
-    return area * n_sides
+    return part1, part2
 
 
-m = read_input()
+m = [line.strip() for line in fileinput.input()]
 
 visited = [[False for _ in line] for line in m]
 
@@ -135,21 +83,21 @@ for i in range(len(m)):
         if visited[i][j]: continue
 
         # bfs from i,j
-        region = set()
-
         to_check = [(i, j)]
+        region = [(i, j)]
+        visited[i][j] = True
 
         while to_check:
             p, q = to_check.pop()
-            if visited[p][q]: continue
-            visited[p][q] = True
-            region.add((p, q))
 
             for pp, qq in neighbours(m, p, q):
 
+                if visited[pp][qq]: continue
                 if m[pp][qq] != m[i][j]: continue
 
                 to_check.append((pp, qq))
+                region.append((pp, qq))
+                visited[pp][qq] = True
 
         regions[m[i][j]].append(region)
 
@@ -160,9 +108,9 @@ part2 = 0
 
 for k, v in regions.items():
     for r in v:
-        debug("k:", k)
-        part1 += price(r)
-        part2 += price_part2(r)
+        p1, p2 = price(r)
+        part1 += p1
+        part2 += p2
 
 print(f"Part 1: {part1}")
 print(f"Part 2: {part2}")
