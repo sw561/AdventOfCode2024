@@ -83,7 +83,13 @@ test11: day11
 	diff <(./day11 < day11.example.in) day11.example.out
 	diff <(./day11 < day11.in) day11.out
 
-test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
+test12:
+	diff <(./day12.py < day12.example.in) day12.example.out
+	diff <(./day12.py < day12.example2.in) day12.example2.out
+	diff <(./day12.py < day12.example3.in) day12.example3.out
+	diff <(./day12.py < day12.in) day12.out
+
+test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12
 
 clean:
 	rm day1 day2 day3 day4 day6 day7 day8 day9 day10 day11
