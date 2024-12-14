@@ -36,6 +36,9 @@ day10: day10.cpp
 day11: day11.cpp
 	g++ -o $@ $(CPPFLAGS) $<
 
+day13: day13.c
+	gcc -o $@ $(CFLAGS) $<
+
 test1: day1
 	diff <(./day1 < day1.example.in) day1.example.out
 	diff <(./day1 < day1.in) day1.out
@@ -91,7 +94,11 @@ test12:
 	diff <(./day12.py < day12.example5.in) day12.example5.out
 	diff <(./day12.py < day12.in) day12.out
 
-test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12
+test13: day13
+	diff <(./day13 < day13.example.in) day13.example.out
+	diff <(./day13 < day13.in) day13.out
+
+test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13
 
 clean:
-	rm day1 day2 day3 day4 day6 day7 day8 day9 day10 day11
+	rm day1 day2 day3 day4 day6 day7 day8 day9 day10 day11 day13
