@@ -87,6 +87,8 @@ test12:
 	diff <(./day12.py < day12.example.in) day12.example.out
 	diff <(./day12.py < day12.example2.in) day12.example2.out
 	diff <(./day12.py < day12.example3.in) day12.example3.out
+	diff <(./day12.py < day12.example4.in) day12.example4.out
+	diff <(./day12.py < day12.example5.in) day12.example5.out
 	diff <(./day12.py < day12.in) day12.out
 
 test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12
