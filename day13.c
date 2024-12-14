@@ -1,14 +1,25 @@
 #include <stdio.h>
 #include <limits.h>
 
-int cheapest(int ax, int ay, int bx, int by, int px, int py)
+typedef long long ll;
+
+
+// Vector ( ax )       ( bx )       ( px )
+//        ( ay ) * A + ( by ) * B = ( py )
+
+
+//    ( ax bx )       ( A )     ( px )
+//    ( ay by )  *    ( B )   = ( py )
+
+ll cheapest(int ax, int ay, int bx, int by, ll px, ll py)
 {
 
-	int price = INT_MAX;
+	ll price = LLONG_MAX;
 
-	for (int a_presses=0; a_presses < 100; a_presses++) {
-		int x = ax * a_presses;
-		int y = ay * a_presses;
+	ll a_presses = 1;
+	while (1) {
+		ll x = ax * a_presses;
+		ll y = ay * a_presses;
 
 		if (x > px) {
 			break;
@@ -16,47 +27,60 @@ int cheapest(int ax, int ay, int bx, int by, int px, int py)
 
 		// Calculate number of b presses required
 		if ((px - x) % bx == 0) {
-			int b_presses = (px - x) / bx;
+			ll b_presses = (px - x) / bx;
 
 			y += b_presses * by;
 
 			if (y == py) {
-
-				int new_price = a_presses * 3 + b_presses;
+				ll new_price = a_presses * 3 + b_presses;
 				price = new_price < price ? new_price : price;
 			}
 		}
+		a_presses++;
 	}
 
-	return price == INT_MAX ? -1 : price;
+	return price == LLONG_MAX ? -1 : price;
 }
 
 int main()
 {
+	int ax, ay, bx, by;
+	ll px, py;
 
-	int N;
-	scanf("%d\n", &N);
+	ll part1 = 0;
+	ll part2 = 0;
+	ll price;
 
-	int ax, ay, bx, by, px, py;
-
-	int part1 = 0;
-
-	for (int i=0; i < N; i++) {
-		scanf("Button A: X+%d, Y+%d\n", &ax, &ay);
+	while (1) {
+		int s = scanf("Button A: X+%d, Y+%d\n", &ax, &ay);
+		if (s == EOF) {
+			break;
+		}
 		scanf("Button B: X+%d, Y+%d\n", &bx, &by);
-		scanf("Prize: X=%d, Y=%d\n", &px, &py);
+		scanf("Prize: X=%lld, Y=%lld\n", &px, &py);
 		scanf("\n");
 
 
-		int price = cheapest(ax, ay, bx, by, px, py);
-		// printf("%d %d %d %d : %d %d ---> %d\n", ax, ay, bx, by, px, py, price);
+		price = cheapest(ax, ay, bx, by, px, py);
+		printf("%d %d %d %d : %lld %lld ---> %lld\n", ax, ay, bx, by, px, py, price);
 
 		if (price > 0) {
 			part1 += price;
 		}
+
+		// px += 10000000000000;
+		// py += 10000000000000;
+
+		// price = cheapest(ax, ay, bx, by, px, py);
+		// printf("%d %d %d %d : %lld %lld ---> %lld\n", ax, ay, bx, by, px, py, price);
+
+		// if (price > 0) {
+		// 	part2 += price;
+		// }
 	}
 
-	printf("Part 1: %d\n", part1);
+	printf("Part 1: %lld\n", part1);
+	printf("Part 2: %lld\n", part2);
 
 	return 0;
 }
