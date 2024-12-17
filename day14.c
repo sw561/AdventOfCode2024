@@ -22,15 +22,10 @@ typedef struct state {
 	int updates;
 } state;
 
-void display(state * s, int * robot_counts) {
-
-	static bool started_print = false;
-	if (started_print) {
-		printf("[%dA\r[0J", NROWS+1);
-	}
-	started_print = true;
-
+int populate_robot_counts(state * s, int * robot_counts) {
 	memset(robot_counts, 0, NROWS*NCOLS*sizeof(int));
+
+	int occupied = 0;
 
 	for (int i=0; i < s->n_robots; i++) {
 		int index = NCOLS * s->robots[i].py + s->robots[i].px;
@@ -39,10 +34,24 @@ void display(state * s, int * robot_counts) {
 				s->robots[i].px, s->robots[i].py, index, NROWS, NCOLS, NROWS*NCOLS);
 			exit(1);
 		}
+		if (!robot_counts[index]) {
+			occupied++;
+		}
 		robot_counts[index]++;
 	}
 
-	printf("N updates: %d\n", s->updates);
+	return occupied;
+}
+
+void display(state * s, int * robot_counts) {
+
+	populate_robot_counts(s, robot_counts);
+
+	static bool started_print = false;
+	if (started_print) {
+		printf("[%dA\r[0J", NROWS+1);
+	}
+	started_print = true;
 
 	for (int row=0; row < NROWS; row++) {
 		for (int col=0; col < NCOLS; col++) {
@@ -71,6 +80,32 @@ void update_all(state * s) {
 		s->robots[i].py %= NROWS;
 	}
 	s->updates++;
+}
+
+int compute_part1(state * s){
+	int tl = 0;
+	int tr = 0;
+	int bl = 0;
+	int br = 0;
+
+	for (int i=0; i < s->n_robots; i++) {
+		if (s->robots[i].py < NROWS / 2) {
+			if (s->robots[i].px < NCOLS / 2) {
+				tl++;
+			} else if (s->robots[i].px > NCOLS / 2) {
+				tr++;
+			}
+		} else if (s->robots[i].py > NROWS / 2) {
+			if (s->robots[i].px < NCOLS / 2) {
+				bl++;
+			} else if (s->robots[i].px > NCOLS / 2) {
+				br++;
+			}
+		}
+	}
+	// printf("%d,%d,%d,%d\n",tl,tr,bl,br);
+
+	return tl * tr * bl * br;
 }
 
 int main()
@@ -109,42 +144,28 @@ int main()
 
 	// display(&s, workspace);
 
-	// for (; updates < 100; updates++) {
-	while (s.updates < 100)
+	int part1 = 0;
+
+	while (populate_robot_counts(&s, workspace) < 500) {
 		update_all(&s);
-	// }
-	// display(&s, workspace);
 
-	// Count quadrants
-
-	int tl = 0;
-	int tr = 0;
-	int bl = 0;
-	int br = 0;
-
-	for (int i=0; i < s.n_robots; i++) {
-		if (s.robots[i].py < NROWS / 2) {
-			if (s.robots[i].px < NCOLS / 2) {
-				tl++;
-			} else if (s.robots[i].px > NCOLS / 2) {
-				tr++;
-			}
-		} else if (s.robots[i].py > NROWS / 2) {
-			if (s.robots[i].px < NCOLS / 2) {
-				bl++;
-			} else if (s.robots[i].px > NCOLS / 2) {
-				br++;
-			}
+		if (s.updates == 100) {
+			part1 = compute_part1(&s);
+#ifdef TEST
+			break;
+#endif
 		}
 	}
+	display(&s, workspace);
 
-	// printf("%d,%d,%d,%d\n",tl,tr,bl,br);
-
-	int part1 = tl * tr * bl * br;
 	printf("Part 1: %d\n", part1);
+#ifndef TEST
+	printf("Part 2: %d\n", s.updates);
+#endif
 
 	free(s.robots);
 	free(workspace);
 
 	return 0;
 }
+

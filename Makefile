@@ -109,4 +109,4 @@ test14: day14 day14test
 test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14
 
 clean:
-	rm day1 day2 day3 day4 day6 day7 day8 day9 day10 day11 day14 day14test
+	rm day1 day2 day3 day4 day6 day7 day8 day9 day9_part2 day10 day11 day14 day14test
