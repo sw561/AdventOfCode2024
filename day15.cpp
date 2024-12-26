@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <set>
 #include <cassert>
 
 using namespace std;
@@ -28,26 +29,70 @@ Point direction(char d) {
 	}
 }
 
-
-bool move(vector<string>& m, const Point& d, Point& robot_pos)
+bool check_move(vector<string>& m, const Point& d, const set<Point>& to_move)
 {
-	Point new_pos = add_points(robot_pos, d);
+	// To check if we can make a move, check if we can move all of the next
+	// blocks that will be required
 
-	switch (m[new_pos[0]][new_pos[1]]) {
-		case '#':
-			return false;
-		case 'O':
-			Point n(new_pos);
-			if (!move(m, d, n)) {
-				return false;
-			}
+	if (to_move.size() == 0) {
+		return true;
 	}
 
-	m[new_pos[0]][new_pos[1]] = m[robot_pos[0]][robot_pos[1]];
-	m[robot_pos[0]][robot_pos[1]] = '.';
+	set<Point> to_move_next;
 
-	robot_pos = new_pos;
+	// printf("To move: ");
+	for (const Point& p : to_move) {
+		// printf("(%d,%d) ", p[0], p[1]);
+		Point n = add_points(p, d);
+
+		if (m[n[0]][n[1]] == '#') {
+			// printf("\n");
+			return false;
+		}
+
+		if (m[n[0]][n[1]] == '.') {
+			continue;
+		}
+
+		if (d[0] != 0) { // Vertical move
+			if (m[n[0]][n[1]] == ']') {
+				to_move_next.insert(n);
+				to_move_next.insert(Point{n[0], n[1]-1});
+			} else if (m[n[0]][n[1]] == '[') {
+				to_move_next.insert(n);
+				to_move_next.insert(Point{n[0], n[1]+1});
+			} else if (m[n[0]][n[1]] == 'O') {
+				to_move_next.insert(n);
+			}
+		} else {
+			to_move_next.insert(n);
+		}
+	}
+	// printf("\n");
+
+	if (!check_move(m, d, to_move_next)) {
+		return false;
+	}
+
+	for (const Point& p : to_move) {
+		Point n = add_points(p, d);
+
+		m[n[0]][n[1]] = m[p[0]][p[1]];
+		m[p[0]][p[1]] = '.';
+	}
+
 	return true;
+}
+
+Point move_robot(vector<string>& m, const Point& d, const Point& robot_pos)
+{
+	set<Point> to_move;
+	to_move.insert(robot_pos);
+
+	if (check_move(m, d, to_move)) {
+		return add_points(robot_pos, d);
+	}
+	return robot_pos;
 }
 
 void show_map(vector<string>& m) {
@@ -56,12 +101,11 @@ void show_map(vector<string>& m) {
 	}
 }
 
-
 int gps(const vector<string>& m) {
 	int score = 0;
 	for (int i=0; i < (int)m.size(); i++) {
 		for (int j=0; j < (int)m[i].size(); j++) {
-			if (m[i][j] == 'O') {
+			if (m[i][j] == 'O' || m[i][j] == '[') {
 				score += 100 * i + j;
 			}
 		}
@@ -70,10 +114,23 @@ int gps(const vector<string>& m) {
 	return score;
 }
 
+int count_boxes(const vector<string>& m) {
+	int count = 0;
+	for (int i=0; i < (int)m.size(); i++) {
+		for (int j=0; j < (int)m[i].size(); j++) {
+			if (m[i][j] == 'O' || m[i][j] == '[') {
+				count++;
+			}
+		}
+	}
+
+	return count;
+}
 
 int main()
 {
 	vector<string> m;
+	vector<string> m2;
 	string s;
 
 	string instructions = "";
@@ -81,6 +138,7 @@ int main()
 	bool reading_map = true;
 
 	Point robot_pos{0};
+	Point robot_pos_part2{0};
 
 	while (getline(cin, s)) {
 		if (s == "") {
@@ -94,18 +152,58 @@ int main()
 				}
 			}
 			m.push_back(s);
+			string part2 = "";
+			for (int j=0; j < (int)s.size(); j++) {
+				switch (s[j]) {
+					case '#':
+						part2.append("##");
+						break;
+					case 'O':
+						part2.append("[]");
+						break;
+					case '.':
+						part2.append("..");
+						break;
+					case '@':
+						part2.append("@.");
+						robot_pos_part2 = Point{(int)m2.size(), 2*j};
+						break;
+					default:
+						assert(false && "Unreachable");
+				}
+			}
+			m2.push_back(part2);
 		} else {
 			instructions.append(s);
 		}
 	}
 
+	const int count = count_boxes(m);
+	assert(count == count_boxes(m2));
+
 	for (const char& d : instructions) {
-		move(m, direction(d), robot_pos);
+		// printf("Robot pos: (%d,%d)  ", robot_pos_part2[0], robot_pos_part2[1]);
+		// printf("Move: %c Count: %d\n", d, count);
+
+		robot_pos = move_robot(m, direction(d), robot_pos);
+		robot_pos_part2 = move_robot(m2, direction(d), robot_pos_part2);
+
+		if (m2[robot_pos_part2[0]][robot_pos_part2[1]] != '@') {
+			printf("Found a problem\n");
+			break;
+		}
+
+		if (count_boxes(m2) != count) {
+			printf("COUNT PROBLEM\n");
+			assert(false);
+		}
 	}
-	// show_map(m);
+	show_map(m2);
 
 	int part1 = gps(m);
+	int part2 = gps(m2);
 	printf("Part 1: %d\n", part1);
+	printf("Part 2: %d\n", part2);
 
 	return 0;
 }

@@ -111,6 +111,7 @@ test14: day14 day14test
 test15: day15
 	diff <(./day15 < day15.example2.in) day15.example2.out
 	diff <(./day15 < day15.example.in) day15.example.out
+	diff <(./day15 < day15.example3.in) day15.example3.out
 	diff <(./day15 < day15.in) day15.out
 
 
