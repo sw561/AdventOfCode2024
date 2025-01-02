@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef long long ll;
 
@@ -37,14 +38,9 @@ ll combo_operand(state * s, int operand)
 	}
 }
 
-int operate(state * s, int * program, int program_size)
+int operate_to_stdout(state * s, int * program, int program_size)
 {
-	static bool first_output = true;
-
-	if (s->p + 1 >= program_size){
-		return -1;
-	}
-
+	while (s->p >= 0 && s->p < program_size) {
 	const int op = program[s->p];
 	const int operand = program[s->p + 1];
 	ll num, den;
@@ -76,10 +72,8 @@ int operate(state * s, int * program, int program_size)
 			s->p += 2;
 			break;
 		case 5:
-			if (!first_output) printf(",");
-			printf("%lld", combo_operand(s, operand) % 8);
-			first_output = false;
 			s->p += 2;
+			return combo_operand(s, operand) % 8;
 			break;
 		case 6:
 			num = s->a;
@@ -94,8 +88,59 @@ int operate(state * s, int * program, int program_size)
 			s->p += 2;
 			break;
 	}
+	}
 
-	return 0;
+	return -1;
+}
+
+void operate(state * s, int * program, int program_size)
+{
+	bool first_output = true;
+	while (true) {
+		int r = operate_to_stdout(s, program, program_size);
+		if (r == -1) break;
+
+		if (!first_output) {
+			printf(",");
+		} else {
+			first_output = false;
+		}
+		printf("%d", r);
+	}
+	printf("\n");
+}
+
+int run_to_output(state * s, int * program, int program_size, ll a)
+{
+	s->a = a;
+	s->b = 0;
+	s->c = 0;
+	s->p = 0;
+	int ret = operate_to_stdout(s, program, program_size);
+	return ret;
+}
+
+ll attempt(ll a, state * s, int * program, int program_size, int i)
+{
+	for (int a_end=0; a_end < 8; a_end++) {
+		ll new_a = a * 8 + a_end;
+		memset(s, 0, sizeof(state));
+		s->a = new_a;
+		int r = operate_to_stdout(s, program, program_size);
+		if (r == program[i]) {
+
+			if (i==0) {
+				return new_a;
+			}
+
+			ll a_ret = attempt(new_a, s, program, program_size, i-1);
+			if (a_ret >= 0) {
+				return a_ret;
+			}
+		}
+	}
+
+	return -1;
 }
 
 int main()
@@ -103,10 +148,6 @@ int main()
 	state s = {0};
 	char * buffer = NULL;
 	size_t n = 0;
-
-	scanf("Register A: %lld", &s.a);
-	scanf("Register B: %lld", &s.b);
-	scanf("Register C: %lld", &s.c);
 
 	getline(&buffer, &n, stdin);
 	sscanf(buffer, "Register A: %lld", &s.a);
@@ -133,12 +174,14 @@ int main()
 	// show(&s);
 	// show_program(program, program_size);
 
-	while(operate(&s, program, program_size) == 0) {
-		// printf("A = %lld, B = %lld, C = %lld\n", s.a, s.b, s.c);
-	}
-
-	printf("\n");
+	printf("Part 1: ");
+	operate(&s, program, program_size);
 	// show(&s);
+
+#ifndef TEST
+	ll a = attempt(0, &s, program, program_size, program_size-1);
+	printf("Part 2: %lld\n", a);
+#endif
 
 	free(program);
 	free(buffer);
