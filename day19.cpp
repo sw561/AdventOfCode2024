@@ -7,6 +7,8 @@
 
 using namespace std;
 
+typedef long long ll;
+
 #define WHITE 0
 #define BLUE 1
 #define BLACK 2
@@ -38,8 +40,9 @@ struct Node {
 
 	~Node() {
 		for (int i=0; i < N_COLOURS; i++) {
-			if (sub_trees[i] == nullptr) continue;
-			delete sub_trees[i];
+			if (sub_trees[i] != nullptr) {
+				delete sub_trees[i];
+			}
 		}
 	}
 };
@@ -79,9 +82,9 @@ void display_tree(Node * tree, int level = 0)
 	}
 }
 
-bool is_buildable(unordered_map<string, bool> &cache, Node * tree, string to_build)
+ll is_buildable(unordered_map<string, ll> &cache, Node * tree, string to_build)
 {
-	if (to_build.empty()) return true;
+	if (to_build.empty()) return 1;
 
 	if (auto search = cache.find(to_build); search!=cache.end()) {
 		return search->second;
@@ -89,24 +92,21 @@ bool is_buildable(unordered_map<string, bool> &cache, Node * tree, string to_bui
 
 	Node * node = tree;
 	int i = 0;
+	ll count_ways = 0;
 
 	while (i < (int)to_build.size()) {
 		node = node->sub_trees[get_index(to_build[i])];
 		if (node == nullptr) {
-			cache[to_build] = false;
-			return false;
+			break;
 		}
 		if (node->is_leaf) {
-			if (is_buildable(cache, tree, to_build.substr(i + 1))) {
-				cache[to_build] = true;
-				return true;
-			}
+			count_ways += is_buildable(cache, tree, to_build.substr(i + 1));
 		}
 		i++;
 	}
 
-	cache[to_build] = false;
-	return false;
+	cache[to_build] = count_ways;
+	return count_ways;
 }
 
 int main()
@@ -128,33 +128,22 @@ int main()
 
 	getline(cin, s); // Empty line expected
 
-	vector<string> to_build;
-	while(getline(cin, s)) {
-		to_build.push_back(s);
-	}
-
-	// for (const string& vi : v) {
-	// 	cout << vi << endl;
-	// }
-	// cout << "----------" << endl;
-	// for (const string& vi : to_build) {
-	// 	cout << vi << endl;
-	// }
-
 	Node * tree = construct_tree(v);
 
 	// display_tree(tree);
 
 	int part1 = 0;
-	unordered_map<string, bool> cache;
-	for (const string& vi : to_build) {
-		if (is_buildable(cache, tree, vi)) {
-			part1++;
-		}
+	ll part2 = 0;
+	unordered_map<string, ll> cache;
+	while(getline(cin, s)) {
+		ll ways = is_buildable(cache, tree, s);
+		if (ways > 0) part1++;
+		part2 += ways;
 	}
 
 	printf("Part 1: %d\n", part1);
+	printf("Part 2: %lld\n", part2);
 
 	delete tree;
-
+	return 0;
 }
