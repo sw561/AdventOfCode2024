@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <iostream>
-#include <vector>
 #include <string>
 #include <cassert>
 #include <unordered_map>
@@ -35,8 +34,10 @@ int get_index(char c)
 }
 
 struct Node {
-	bool is_leaf = false;
-	Node * sub_trees[N_COLOURS] = {nullptr};
+	bool is_leaf;
+	Node * sub_trees[N_COLOURS];
+
+	Node() : is_leaf(false), sub_trees{nullptr} {}
 
 	~Node() {
 		for (int i=0; i < N_COLOURS; i++) {
@@ -47,23 +48,16 @@ struct Node {
 	}
 };
 
-Node * construct_tree(vector<string> v)
+void add_to_tree(Node * node, string s)
 {
-	Node * tree = new(Node);
-
-	for (const string& s : v) {
-
-		Node * node = tree;
-		for (const char& c : s) {
-			if (node->sub_trees[get_index(c)] == nullptr) {
-				node->sub_trees[get_index(c)] = new Node;
-			}
-			node = node->sub_trees[get_index(c)];
+	for (const char& c : s) {
+		int index = get_index(c);
+		if (node->sub_trees[index] == nullptr) {
+			node->sub_trees[index] = new Node;
 		}
-		node->is_leaf = true;
+		node = node->sub_trees[index];
 	}
-
-	return tree;
+	node->is_leaf = true;
 }
 
 void display_tree(Node * tree, int level = 0)
@@ -73,16 +67,16 @@ void display_tree(Node * tree, int level = 0)
 		if (node == nullptr) continue;
 
 		cout << (node->is_leaf ? "--->" : "    ");
-
 		for (int j=0; j < level; j++) {
 			cout << " ";
 		}
 		cout << c << endl;
+
 		display_tree(node, level+1);
 	}
 }
 
-ll is_buildable(unordered_map<string, ll> &cache, Node * tree, string to_build)
+ll is_buildable(unordered_map<string, ll> &cache, const Node& tree, string to_build)
 {
 	if (to_build.empty()) return 1;
 
@@ -90,11 +84,10 @@ ll is_buildable(unordered_map<string, ll> &cache, Node * tree, string to_build)
 		return search->second;
 	}
 
-	Node * node = tree;
-	int i = 0;
+	const Node * node = &tree;
 	ll count_ways = 0;
 
-	while (i < (int)to_build.size()) {
+	for (size_t i=0; i < to_build.size(); i++) {
 		node = node->sub_trees[get_index(to_build[i])];
 		if (node == nullptr) {
 			break;
@@ -102,7 +95,6 @@ ll is_buildable(unordered_map<string, ll> &cache, Node * tree, string to_build)
 		if (node->is_leaf) {
 			count_ways += is_buildable(cache, tree, to_build.substr(i + 1));
 		}
-		i++;
 	}
 
 	cache[to_build] = count_ways;
@@ -112,14 +104,13 @@ ll is_buildable(unordered_map<string, ll> &cache, Node * tree, string to_build)
 int main()
 {
 	string s;
-	vector<string> v;
-
 	getline(cin, s);
 
 	int start = 0;
+	Node tree;
 	while (true) {
 		size_t d = s.find(',', start);
-		v.push_back(s.substr(start, d-start));
+		add_to_tree(&tree, s.substr(start, d-start));
 		if (d == string::npos) {
 			break;
 		}
@@ -128,9 +119,7 @@ int main()
 
 	getline(cin, s); // Empty line expected
 
-	Node * tree = construct_tree(v);
-
-	// display_tree(tree);
+	// display_tree(&tree);
 
 	int part1 = 0;
 	ll part2 = 0;
@@ -144,6 +133,5 @@ int main()
 	printf("Part 1: %d\n", part1);
 	printf("Part 2: %lld\n", part2);
 
-	delete tree;
 	return 0;
 }
