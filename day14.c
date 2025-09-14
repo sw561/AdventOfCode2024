@@ -122,7 +122,7 @@ int main()
 	int * workspace = malloc(NROWS * NCOLS * sizeof(int));
 
 	size_t n;
-	char * buffer;
+	char * buffer = NULL;
 	while (getline(&buffer, &n, stdin) > 0) {
 		sscanf(buffer, "p=%d,%d v=%d,%d",
 			&s.robots[s.n_robots].px,
