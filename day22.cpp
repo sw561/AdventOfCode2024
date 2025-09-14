@@ -35,28 +35,11 @@ struct FixedQueue {
     }
   }
 
-  bool compare(int sequence[N]) {
-    for (int i=0; i < N; i++) {
-      if (data[(starting_index + i) % N] != sequence[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   void insert(int x) {
     data[starting_index] = x;
-    starting_index = (starting_index + 1) % N;
-  }
 
-  /*
-  void print() {
-    for (int i=0; i < N; i++) {
-      cout << data[(starting_index + i) % N] << " ";
-    }
-    cout << "\n";
+    starting_index = starting_index == 3 ? 0 : starting_index + 1;
   }
-  */
 
   int operator[](const int& i) const {
     return data[(starting_index + i) % N];
@@ -72,54 +55,14 @@ struct FixedQueue {
     }
     return false;
   }
-
-  bool operator==(const FixedQueue& rhs)const {
-    for (int i=0; i < N; i++) {
-      if (this->operator[](i) != rhs[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
 };
-
-int sell(long long secret, int sequence[N])
-{
-
-  FixedQueue f;
-  ll new_secret;
-
-  constexpr long long digit = 10;;
-  for (int i=0; i < 2000; i++) {
-    new_secret = next_secret(secret);
-
-    f.insert(new_secret % digit - secret % digit);
-
-    if (f.compare(sequence)) {
-      return new_secret % digit;
-    }
-
-    secret = new_secret;
-  }
-
-  return 0;
-}
-
-
-int total_value(vector<ll> data, int sequence[N]) {
-  int total = 0;
-  for (ll x : data) {
-    total += sell(x, sequence);
-  }
-  return total;
-}
 
 map<FixedQueue, int> sell(long long secret)
 {
   FixedQueue f;
   map<FixedQueue, int> prices;
   ll new_secret;
-  constexpr long long digit = 10;;
+  constexpr long long digit = 10;
 
   for (int i=0; i < 2000; i++) {
     new_secret = next_secret(secret);
@@ -162,24 +105,10 @@ int main()
 
 
   {
-    int sequence[N] = {-1,-1,0,2};
-    int ret = sell(123, sequence);
-    assert(ret == 6);
-  }
-
-
-  {
-    // int sequence[N] = {-2,1,-1,3};
-
-    // FixedQueue f_expectation;
-    // for (int i=0; i < N; i++) {
-    //   f_expectation.insert(sequence[i]);
-    // }
 
     map<FixedQueue, int> score_for_sequences;
 
     for (ll x : data) {
-      // cout << x << " " << sell(x, sequence) << "\n";
       map<FixedQueue, int> sequences = sell(x);
 
       for (auto it = sequences.begin(); it != sequences.end(); it++) {
@@ -190,14 +119,6 @@ int main()
         }
         score_for_sequences[it->first] = current_score + it->second;
       }
-
-      // auto search = sequences.find(f_expectation);
-      // if (search != sequences.end()) {
-      //   cout << search->second << "\n";
-      // }
-      // else {
-      //   cout << "Not found\n";
-      // }
     }
 
     // Find sequence which gives the best total
