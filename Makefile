@@ -62,7 +62,7 @@ day21: day21.cpp
 	g++ -g -o $@ -Wall -Wextra --std=c++17 $<
 
 day22: day22.cpp
-	g++ -o $@ $(CPPFLAGS) $<
+	g++ -g -o $@ -Wall -Wextra -std=c++17 $<
 
 day22test: day22.cpp
 	g++ -o $@ -D TEST $(CPPFLAGS) $<
