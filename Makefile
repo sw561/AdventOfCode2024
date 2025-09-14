@@ -1,4 +1,4 @@
-all: day1 day2 day3 day4 day6 day7 day8 day9 day9_part2 day10 day11 day14 day14test day15 day17 day17test day19 day21
+all: day1 day2 day3 day4 day6 day7 day8 day9 day9_part2 day10 day11 day14 day14test day15 day17 day17test day19 day21 day22
 
 CFLAGS = -O3 -Wall -Wextra --std=gnu99
 CPPFLAGS = -O3 -Wall -Wextra --std=c++17
@@ -60,6 +60,12 @@ day19: day19.cpp
 day21: day21.cpp
 	# g++ -o $@ $(CPPFLAGS) $<
 	g++ -g -o $@ -Wall -Wextra --std=c++17 $<
+
+day22: day22.cpp
+	g++ -o $@ $(CPPFLAGS) $<
+
+day22test: day22.cpp
+	g++ -o $@ -D TEST $(CPPFLAGS) $<
 
 test1: day1
 	diff <(./day1 < day1.example.in) day1.example.out
@@ -151,7 +157,11 @@ test21: day21
 	diff <(./day21 < day21.example.in) day21.example.out
 	diff <(./day21 < day21.in) day21.out
 
-test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14 test15 test17 test18 test19 test21
+test22: day22 day22test
+	diff <(./day22test < day22.example.in) day22.example.out
+	diff <(./day22 < day22.in) day22.out
+
+test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14 test15 test17 test18 test19 test22
 
 clean:
 	rm day1 day2 day3 day4 day6 day7 day8 day9 day9_part2 day10 day11 day14 day14test day15 day16 day17 day17test day19 day21
