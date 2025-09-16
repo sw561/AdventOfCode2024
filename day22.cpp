@@ -57,26 +57,36 @@ struct FixedQueue {
   }
 };
 
-map<FixedQueue, int> sell(long long secret)
+struct Score {
+  int score;
+  int last_seen_index;
+};
+
+void sell(int index, long long secret, map<FixedQueue, Score>& score_for_sequences)
 {
   FixedQueue f;
-  map<FixedQueue, int> prices;
   ll new_secret;
-  constexpr long long digit = 10;
+  constexpr int digit = 10;
 
   for (int i=0; i < 2000; i++) {
     new_secret = next_secret(secret);
 
     f.insert(new_secret % digit - secret % digit);
+    int score = (int)new_secret % digit;
 
-    if (auto search = prices.find(f); search == prices.end()) {
-      prices[f] = new_secret % digit;
+    auto search = score_for_sequences.find(f);
+    if (search == score_for_sequences.end()) {
+      // It was not found
+      score_for_sequences[f] = {
+        .score = score,
+        .last_seen_index = index
+      };
+    } else if (search->second.last_seen_index < index) {
+      search->second.score += score;
+      search->second.last_seen_index = index;
     }
-
     secret = new_secret;
   }
-
-  return prices;
 }
   
 
@@ -106,25 +116,17 @@ int main()
 
   {
 
-    map<FixedQueue, int> score_for_sequences;
+    map<FixedQueue, Score> score_for_sequences;
 
-    for (ll x : data) {
-      map<FixedQueue, int> sequences = sell(x);
-
-      for (auto it = sequences.begin(); it != sequences.end(); it++) {
-        int current_score = 0;
-        auto current = score_for_sequences.find(it->first);
-        if (current != score_for_sequences.end()) {
-          current_score = current->second;
-        }
-        score_for_sequences[it->first] = current_score + it->second;
-      }
+    for (size_t index = 0; index < data.size(); index++) {
+      ll x = data[index];
+      sell(index, x, score_for_sequences);
     }
 
     // Find sequence which gives the best total
     int best_score = 0;
     for (auto it=score_for_sequences.begin(); it != score_for_sequences.end(); it++) {
-      best_score = max(best_score, it->second);
+      best_score = max(best_score, it->second.score);
     }
 
     cout << best_score << "\n";
