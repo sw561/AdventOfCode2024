@@ -137,9 +137,9 @@ test15: day15
 	diff <(./day15 < day15.in) day15.out
 
 test16:
-	diff <(./day16.py day16.example.in) <(echo 7036)
-	diff <(./day16.py day16.example2.in) <(echo 11048)
-	diff <(./day16.py day16.in) <(echo 65436)
+	diff <(./day16.py day16.example.in) <(printf '7036\n45\n')
+	diff <(./day16.py day16.example2.in) <(printf '11048\n64\n')
+	diff <(./day16.py day16.in) <(printf '65436\n489\n')
 
 test17: day17 day17test
 	diff <(./day17test < day17.example.in) day17.example.out
