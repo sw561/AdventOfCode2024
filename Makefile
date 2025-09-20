@@ -173,6 +173,11 @@ test24:
 	gcc -o day24 day24.c
 	diff <(./day24) day24.out
 
+test24_part2:
+	./day24_part2.py < day24.repair.in
+	gcc -o day24 day24_part2.c
+	./day24
+
 test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14 test15 test17 test18 test19 test22 test23 test24
 
 clean:
