@@ -136,9 +136,10 @@ test15: day15
 	diff <(./day15 < day15.example3.in) day15.example3.out
 	diff <(./day15 < day15.in) day15.out
 
-test16: day16
-	diff <(./day16 < day16.example.in) day16.example.out
-	diff <(./day16 < day16.in) day16.out
+test16:
+	diff <(./day16.py day16.example.in) <(echo 7036)
+	diff <(./day16.py day16.example2.in) <(echo 11048)
+	diff <(./day16.py day16.in) <(echo 65436)
 
 test17: day17 day17test
 	diff <(./day17test < day17.example.in) day17.example.out
